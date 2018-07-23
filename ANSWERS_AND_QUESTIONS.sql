@@ -65,9 +65,30 @@ WHERE
 
 --5.*Write a query which will display the account number, customer id, registration date, initial deposit amount of the customer
 -- whose initial deposit amount is within the range of Rs.15000 to Rs.25000.
---
+
+SELECT
+    b.account_no,
+    b.registration_date,
+    b.initial_deposit,
+    a.customer_id
+FROM
+    account_info b,
+    customer_personal_info a
+WHERE
+    a.customer_id = b.customer_id AND b.initial_deposit BETWEEN 15000 AND 25000 ;
+
 --6.*Write a query which will display customer id, customer name, date of birth, guardian name of the customers whose name starts with 'J'.
---
+
+SELECT
+    customer_personal_info.customer_id,
+    customer_personal_info.customer_name,
+    customer_personal_info.date_of_birth,
+    customer_personal_info.guardian_name
+FROM
+    customer_personal_info 
+WHERE
+    customer_personal_info.customer_name LIKE 'J%';
+
 --7.*Write a query which will display customer id, account number and passcode. 
 --<br/>
 --Hint:  To generate passcode, join the last three digits of customer id and last four digit of account number.
@@ -75,13 +96,42 @@ WHERE
 --<br/>Example
 --<br/>C-001                   1234567898765432                0015432
 --<br/>Use ""PASSCODE"" as alias name for displaying the passcode."
---
+
+
+
 --8.*Write a query which will display the customer id, customer name, date of birth, Marital Status, Gender, Guardian name, 
 --contact no and email id of the customers whose gender is male 'M' and marital status is MARRIED.
---
+
+SELECT
+    customer_personal_info.customer_id,
+    customer_personal_info.customer_name,
+    customer_personal_info.date_of_birth,
+    customer_personal_info.marital_status,
+    customer_personal_info.gender,
+    customer_personal_info.guardian_name,
+    customer_personal_info.contact_no,
+    customer_personal_info.mail_id
+FROM
+    customer_personal_info
+WHERE
+    customer_personal_info.gender='M'
+    AND
+    customer_personal_info.marital_status='MARRIED';
+
 --9.*Write a query which will display the customer id, customer name, guardian name, reference account holders name of the customers 
 --who are referenced / referred by their 'FRIEND'.
---
+
+SELECT
+    c.customer_id,
+    c.customer_name,
+    c.guardian_name,
+    d.reference_acc_name,
+FROM
+    customer_reference_info d,
+    customer_personal_info c
+WHERE
+    c.customer_id = d.customer_id;
+
 --10.*Write a query to display the customer id, account number and interest amount in the below format with INTEREST_AMT as alias name
 -- Sort the result based on the INTEREST_AMT in ascending order.  <BR/>Example: 
 --$5<BR/>Hint: Need to prefix $ to interest amount and round the result without decimals.
