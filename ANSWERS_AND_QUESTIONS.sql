@@ -97,7 +97,14 @@ WHERE
 --<br/>C-001                   1234567898765432                0015432
 --<br/>Use ""PASSCODE"" as alias name for displaying the passcode."
 
-
+--SELECT
+--    o.customer_id,
+--    p.account_no, RIGHT(CAST(o.customer_id AS CHAR),3), RIGHT(CAST(p.account_no AS PASSCODE),4)
+--FROM
+--    account_info p,
+--    customer_personal_info o
+--WHERE
+--    o.customer_id = p.customer_id;
 
 --8.*Write a query which will display the customer id, customer name, date of birth, Marital Status, Gender, Guardian name, 
 --contact no and email id of the customers whose gender is male 'M' and marital status is MARRIED.
@@ -141,29 +148,127 @@ WHERE
 SELECT
     account_info.customer_id,
     account_info.account_no,
-    CONCAT('$', account_info.interest / 100 * account_info.initial_deposit) AS INTEREST_AMT
+    CONCAT('$',(account_info.interest / 100 * account_info.initial_deposit) ) AS INTEREST_AMT
 FROM
     account_info
-ORDER BY INTEREST_AMT;
+ORDER BY (account_info.interest / 100 * account_info.initial_deposit); -- USE Formula in ORDER_BY Clause to arrange output...
+
 
 --11.*Write a query which will display the customer id, customer name, account no, account type, activation date,
 -- bank name whose account willnull be activated on '10-APR-2012'
---
+
+SELECT
+    g.customer_id,
+    g.customer_name,
+    h.account_no,
+    h.account_type,
+    h.activation_date,
+    i.ifsc_code
+FROM
+    account_info h,
+    customer_personal_info g,
+    bank_info i
+WHERE
+    g.customer_id = h.customer_id
+    AND i.ifsc_code = h.ifsc_code AND h.activation_date='10-APR-12';
+
 --12.*Write a query which will display account number, customer id, customer name, bank name, branch name, ifsc code
 --, citizenship, interest and initial deposit amount of all the customers.
---
+
+SELECT
+    k.account_no,
+    k.customer_id,
+    k.interest,
+    k.initial_deposit,
+    j.customer_name,
+    j.citizenship,
+    l.bank_name,
+    l.branch_name,
+    l.ifsc_code
+FROM
+    account_info k,
+    customer_personal_info j,
+    bank_info l
+WHERE
+    j.customer_id = k.customer_id
+    AND l.ifsc_code = k.ifsc_code;
+    
 --13.*Write a query which will display customer id, customer name, date of birth, guardian name, contact number,
 -- mail id and reference account holder's name of the customers who has submitted the passport as an identification document.
---
+
+SELECT
+    m.customer_id,
+    m.date_of_birth,
+    m.customer_name,
+    m.contact_no,
+    m.guardian_name,
+    m.mail_id,
+    n.reference_acc_name
+FROM
+    customer_reference_info n,
+    customer_personal_info m
+WHERE
+    m.customer_id = n.customer_id AND m.identification_doc_type='PASSPORT';
+
 --14.*Write a query to display the customer id, customer name, account number, account type, initial deposit, 
 --interest who have deposited maximum amount in the bank.
---
+
+SELECT
+    q.customer_id,
+    q.customer_name,
+    r.account_no,
+    r.account_type,
+    r.interest,
+    r.initial_deposit,
+    s.bank_name
+FROM
+    account_info r,
+    customer_personal_info q,
+    bank_info s
+WHERE
+    q.customer_id = r.customer_id
+    AND s.ifsc_code = r.ifsc_code 
+    AND r.initial_deposit=(SELECT MAX(r.initial_deposit) FROM account_info r);
+
 --15.*Write a query to display the customer id, customer name, account number, account type, interest, bank name 
 --and initial deposit amount of the customers who are getting maximum interest rate.
---
+
+SELECT
+    t.customer_id,
+    t.customer_name,
+    u.account_no,
+    u.account_type,
+    u.interest,
+    u.initial_deposit*u.interest/100 AS INTEREST_AMT,
+    v.bank_name
+FROM
+    account_info u,
+    customer_personal_info t,
+    bank_info v
+WHERE
+    t.customer_id = u.customer_id
+    AND v.ifsc_code = u.ifsc_code
+    AND u.initial_deposit*u.interest/100=(SELECT MAX(u.initial_deposit*u.interest/100) FROM account_info u);
+
 --16.Write a query to display the customer id, customer name, account no, bank name, contact no 
 --and mail id of the customers who are from BANGALORE.
---
+
+SELECT
+    w.customer_id,
+    w.customer_name,
+    w.contact_no,
+    w.mail_id,
+    x.account_no,
+    y.bank_name
+FROM
+    account_info x,
+    customer_personal_info w,
+    bank_info y
+WHERE
+    w.customer_id = x.customer_id
+    AND y.ifsc_code = x.ifsc_code;
+
+
 --17.Write a query which will display customer id, bank name, branch name, ifsc code, registration date, 
 --activation date of the customers whose activation date is in the month of march (March 1'st to March 31'st).
 --
