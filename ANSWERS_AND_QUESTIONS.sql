@@ -125,19 +125,29 @@ SELECT
     c.customer_id,
     c.customer_name,
     c.guardian_name,
-    d.reference_acc_name,
+    d.reference_acc_name
 FROM
     customer_reference_info d,
     customer_personal_info c
 WHERE
-    c.customer_id = d.customer_id;
+    c.customer_id = d.customer_id
+    AND
+    d.relation='FRIEND';
 
 --10.*Write a query to display the customer id, account number and interest amount in the below format with INTEREST_AMT as alias name
 -- Sort the result based on the INTEREST_AMT in ascending order.  <BR/>Example: 
 --$5<BR/>Hint: Need to prefix $ to interest amount and round the result without decimals.
--- 
+
+SELECT
+    account_info.customer_id,
+    account_info.account_no,
+    CONCAT('$', account_info.interest / 100 * account_info.initial_deposit) AS INTEREST_AMT
+FROM
+    account_info
+ORDER BY INTEREST_AMT;
+
 --11.*Write a query which will display the customer id, customer name, account no, account type, activation date,
--- bank name whose account will be activated on '10-APR-2012'
+-- bank name whose account willnull be activated on '10-APR-2012'
 --
 --12.*Write a query which will display account number, customer id, customer name, bank name, branch name, ifsc code
 --, citizenship, interest and initial deposit amount of all the customers.
