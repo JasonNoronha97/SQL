@@ -61,7 +61,11 @@ WHERE
 --<BR/> 
 --Use ""UNIQUE_REF_STRING"" as alias name for displaying the unique reference string."
 
-
+SELECT
+    customer_id|| ' ' ||    customer_name|| ' ' ||    gender|| ' ' ||    marital_status UNIQUE_REF_STRING
+FROM
+    customer_personal_info
+ORDER BY customer_id DESC;
 
 --5.*Write a query which will display the account number, customer id, registration date, initial deposit amount of the customer
 -- whose initial deposit amount is within the range of Rs.15000 to Rs.25000.
@@ -97,14 +101,12 @@ WHERE
 --<br/>C-001                   1234567898765432                0015432
 --<br/>Use ""PASSCODE"" as alias name for displaying the passcode."
 
---SELECT
---    o.customer_id,
---    p.account_no, RIGHT(CAST(o.customer_id AS CHAR),3), RIGHT(CAST(p.account_no AS PASSCODE),4)
---FROM
---    account_info p,
---    customer_personal_info o
---WHERE
---    o.customer_id = p.customer_id;
+SELECT
+    customer_id,
+    account_no,
+    CONCAT(SUBSTR(customer_id,-3),SUBSTR(account_no,-4)) PASSCODE    
+FROM
+    account_info;
 
 --8.*Write a query which will display the customer id, customer name, date of birth, Marital Status, Gender, Guardian name, 
 --contact no and email id of the customers whose gender is male 'M' and marital status is MARRIED.
@@ -348,23 +350,13 @@ FROM
 --bank name, branch name and initial deposit for all the customers.
 
 SELECT
-    hh.reference_acc_no,    ii.account_type,    ii.customer_id,    gg.customer_name,    gg.date_of_birth,
-    gg.guardian_name,    hh.reference_acc_name,    ii.account_no,
-    ii.registration_date,
-    ii.activation_date,
-    ii.activation_date - ii.registration_date AS NoofdaysforActivation,
-    ii.initial_deposit,
-    gg.gender,
-    gg.contact_no,
-    
-    gg.mail_id,
-    jj.bank_name,
-    jj.branch_name
+    ii.account_no,    ii.account_type,    ii.customer_id,    gg.customer_name,    gg.date_of_birth,
+    gg.guardian_name,    hh.reference_acc_name,  hh.reference_acc_no,  
+    ii.registration_date,    ii.activation_date,    ii.activation_date - ii.registration_date AS NoofdaysforActivation,
+    ii.initial_deposit,    gg.gender,    gg.contact_no,    
+    gg.mail_id,    jj.bank_name,    jj.branch_name
 FROM
-    customer_reference_info hh,
-    customer_personal_info gg,
-    account_info ii,
-    bank_info jj
+    customer_reference_info hh,    customer_personal_info gg,    account_info ii,    bank_info jj
 WHERE
     gg.customer_id = hh.customer_id
     AND gg.customer_id = ii.customer_id
@@ -375,14 +367,44 @@ WHERE
 --who has only the savings account. 
 --<br/>Hint:  Formula for calculating current balance is add the intital deposit amount and interest
 -- and display without any decimals. Use ""CURRENT_BALANCE"" as alias name."
---
+
+SELECT
+    a.customer_id,    a.customer_name,    a.guardian_name,    a.identification_doc_type,
+    b.reference_acc_name,    c.account_type,    d.ifsc_code,
+    d.bank_name, c.interest/100*c.initial_deposit as "CURRENT BALANCE"
+FROM
+    customer_reference_info b,
+    customer_personal_info a,
+    account_info c,
+    bank_info d
+WHERE
+    a.customer_id = b.customer_id
+    AND a.customer_id = c.customer_id
+    AND d.ifsc_code = c.ifsc_code
+    AND c.account_type='SAVINGS';
+
 --23."Write a query which will display the customer id, customer name, account number, account type, interest, initial deposit;
 -- <br/>check the initial deposit,<br/> if initial deposit is 20000 then display ""high"",<br/> if initial deposit is 16000 display 'moderate'
 --,<br/> if initial deposit is 10000 display 'average', <br/>if initial deposit is 5000 display 'low', <br/>if initial deposit is 0 display
 -- 'very low' otherwise display 'invalid' and sort by interest in descending order.<br/>
 --Hint: Name the column as ""Deposit_Status"" (alias). 
 --<br/>Strictly follow the lower case for strings in this query."
---
+
+SELECT
+    account_info.customer_id,    CUSTOMER_NAME,    account_no,    account_type,    interest,    initial_deposit,
+    CASE initial_deposit 
+        WHEN 20000  THEN    'high'
+        WHEN 16000  THEN    'moderate'
+        WHEN 10000  THEN    'average'
+        WHEN 5000   THEN    'low'   
+        WHEN 0      THEN    'very low'   
+        ELSE                'invalid' END
+FROM
+    account_info,    CUSTOMER_PERSONAL_INFO
+WHERE
+    account_info.customer_id = CUSTOMER_PERSONAL_INFO.customer_id
+ORDER BY interest DESC;
+
 --24."Write a query which will display customer id, customer name,  account number, account type, bank name, ifsc code, initial deposit amount
 -- and new interest amount for the customers whose name starts with ""J"". 
 --<br/> Hint:  Formula for calculating ""new interest amount"" is 
@@ -390,9 +412,37 @@ WHERE
 -- Round the new interest amount to 2 decimals.<br/> Use ""NEW_INTEREST"" as alias name for displaying the new interest amount.
 --
 --<br/>Example, Assume Jack has savings account and his current interest amount is 10.00, then the new interest amount is 11.00 i.e (10 + (10 * 10/100)). 
---"
---
+
+SELECT
+    account_info.customer_id,    CUSTOMER_NAME,    account_no,    account_type,    BANK_NAME,    account_info.ifsc_code,    initial_deposit,
+    CASE
+        WHEN account_type = 'SAVINGS'
+           THEN ((INTEREST/100)*INITIAL_DEPOSIT)+((INTEREST/100)*INITIAL_DEPOSIT*10/100)
+    ELSE
+           ((INTEREST/100)*INITIAL_DEPOSIT)
+    END  NEW_INTEREST
+FROM
+    account_info,    CUSTOMER_PERSONAL_INFO,    BANK_INFO
+WHERE 
+    account_info.IFSC_CODE = BANK_INFO.IFSC_CODE AND
+    account_info.customer_id = CUSTOMER_PERSONAL_INFO.customer_id AND 
+    CUSTOMER_NAME LIKE 'J%';
+
 --25.Write query to display the customer id, customer name, account no, initial deposit, tax percentage as calculated below.
 --<BR>Hint: <BR>If initial deposit = 0 then tax is '0%'<BR>If initial deposit &lt;= 10000 then tax is '3%' 
 --<BR>If initial deposit &gt; 10000 and initial deposit &lt; 20000 then tax is '5%' <BR>If initial deposit &gt;= 20000 and
 -- initial deposit&lt;=30000 then tax is '7%' <BR>If initial deposit &gt; 30000 then tax is '10%' <BR>Use the alias name 'taxPercentage'
+
+SELECT
+    account_info.customer_id,    CUSTOMER_NAME,    account_no,    initial_deposit,
+    CASE
+        WHEN initial_deposit = 0            THEN '0%'       
+        WHEN initial_deposit <= 10000       THEN '3%'     
+        WHEN initial_deposit > 10000 AND initial_deposit<20000      THEN '3%'     
+        WHEN initial_deposit >=20000 AND initial_deposit<=30000     THEN '7%'     
+        WHEN initial_deposit > 30000        THEN '10%'
+    END taxPercentage
+FROM
+    account_info,    CUSTOMER_PERSONAL_INFO
+WHERE
+    account_info.customer_id = CUSTOMER_PERSONAL_INFO.customer_id;
